@@ -1,0 +1,1854 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PGM BI — Beneficiation & Regulatory Importer on Record</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=IBM+Plex+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink: #0e0e0e;
+  --ink-soft: #1c1c1c;
+  --charcoal: #2a2a2a;
+  --fog: #f0ede8;
+  --paper: #f8f6f2;
+  --white: #ffffff;
+  --teal: #00c4a0;
+  --teal-dim: rgba(0,196,160,0.12);
+  --teal-dark: #009e82;
+  --rust: #c0392b;
+  --mid: #888880;
+  --line: rgba(14,14,14,0.12);
+  --line-strong: rgba(14,14,14,0.25);
+}
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+
+body {
+  font-family: 'IBM Plex Mono', monospace;
+  background: var(--paper);
+  color: var(--ink);
+  overflow-x: hidden;
+}
+
+/* CUSTOM CURSOR */
+*, a { cursor: crosshair; }
+
+/* ━━━ GRID TEXTURE ━━━ */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image:
+    linear-gradient(var(--line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--line) 1px, transparent 1px);
+  background-size: 80px 80px;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.6;
+}
+
+/* ━━━ NAV ━━━ */
+nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 100;
+  background: var(--ink);
+  border-bottom: 3px solid var(--teal);
+  display: flex;
+  align-items: stretch;
+  height: 56px;
+}
+
+.nav-logo-block {
+  display: flex;
+  align-items: center;
+  padding: 0 2rem;
+  border-right: 1px solid rgba(255,255,255,0.08);
+  gap: 0.75rem;
+}
+
+.nav-logo {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.4rem;
+  letter-spacing: 0.15em;
+  color: var(--white);
+}
+
+.nav-logo-tag {
+  font-size: 0.55rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--teal);
+  border: 1px solid var(--teal);
+  padding: 0.2rem 0.5rem;
+}
+
+.nav-links {
+  display: flex;
+  list-style: none;
+  flex: 1;
+  padding: 0 1.5rem;
+}
+
+.nav-links li { display: flex; align-items: center; }
+
+.nav-links a {
+  font-size: 0.65rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.5);
+  text-decoration: none;
+  padding: 0 1.25rem;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  border-right: 1px solid rgba(255,255,255,0.05);
+  transition: all 0.2s;
+}
+
+.nav-links a:hover { color: var(--teal); background: rgba(0,196,160,0.06); }
+
+.nav-cta-block {
+  display: flex;
+  align-items: center;
+  padding: 0 2rem;
+  border-left: 1px solid rgba(255,255,255,0.08);
+}
+
+.nav-cta {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.65rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--ink);
+  background: var(--teal);
+  padding: 0.5rem 1.2rem;
+  text-decoration: none;
+  transition: all 0.2s;
+}
+
+.nav-cta:hover { background: var(--teal-dark); }
+
+/* ━━━ HERO ━━━ */
+.hero {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  position: relative;
+  padding-top: 56px;
+  z-index: 1;
+}
+
+.hero-left {
+  background: var(--ink);
+  padding: 6rem 4rem 5rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.hero-left::before {
+  content: '';
+  position: absolute;
+  bottom: -80px; right: -80px;
+  width: 320px; height: 320px;
+  border: 60px solid rgba(0,196,160,0.06);
+  border-radius: 50%;
+}
+
+.hero-left::after {
+  content: '';
+  position: absolute;
+  top: 40px; left: 40px;
+  width: 100px; height: 100px;
+  border-top: 2px solid var(--teal);
+  border-left: 2px solid var(--teal);
+  opacity: 0.4;
+}
+
+.hero-index {
+  font-size: 0.6rem;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--teal);
+  margin-bottom: 2.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.hero-index::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: rgba(0,196,160,0.3);
+  max-width: 80px;
+}
+
+.hero-headline {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(3.5rem, 5.5vw, 6.5rem);
+  letter-spacing: 0.04em;
+  line-height: 0.92;
+  color: var(--white);
+  margin-bottom: 1rem;
+}
+
+.hero-headline .accent { color: var(--teal); }
+
+.hero-headline-sub {
+  font-family: 'Libre Baskerville', serif;
+  font-style: italic;
+  font-size: clamp(1.1rem, 2vw, 1.6rem);
+  color: rgba(255,255,255,0.45);
+  line-height: 1.4;
+  margin-bottom: 3rem;
+}
+
+.hero-body {
+  font-size: 0.78rem;
+  line-height: 2;
+  color: rgba(255,255,255,0.55);
+  max-width: 420px;
+  margin-bottom: 3rem;
+}
+
+.hero-body strong { color: rgba(255,255,255,0.85); font-weight: 400; }
+
+.hero-actions { display: flex; flex-direction: column; gap: 1rem; }
+
+.btn-teal {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.5rem;
+  background: var(--teal);
+  color: var(--ink);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  text-decoration: none;
+  border: none;
+  transition: all 0.25s;
+  width: 100%;
+  max-width: 340px;
+}
+
+.btn-teal:hover { background: var(--teal-dark); transform: translateX(4px); }
+
+.btn-wire {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.5rem;
+  background: transparent;
+  color: rgba(255,255,255,0.6);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  text-decoration: none;
+  border: 1px solid rgba(255,255,255,0.15);
+  transition: all 0.25s;
+  width: 100%;
+  max-width: 340px;
+}
+
+.btn-wire:hover { border-color: rgba(255,255,255,0.4); color: var(--white); }
+
+/* RIGHT SIDE */
+.hero-right {
+  background: var(--fog);
+  display: flex;
+  flex-direction: column;
+  border-left: 3px solid var(--teal);
+  position: relative;
+  z-index: 1;
+}
+
+.hero-right-top {
+  flex: 1;
+  padding: 6rem 3.5rem 3rem;
+  border-bottom: 1px solid var(--line-strong);
+}
+
+.hero-right-top h3 {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 0.85rem;
+  letter-spacing: 0.25em;
+  color: var(--mid);
+  margin-bottom: 2rem;
+}
+
+.capability-list { list-style: none; }
+
+.capability-list li {
+  font-size: 0.78rem;
+  color: var(--charcoal);
+  padding: 1.2rem 0;
+  border-bottom: 1px solid var(--line);
+  display: grid;
+  grid-template-columns: 2rem 1fr;
+  gap: 0.75rem;
+  align-items: start;
+  line-height: 1.6;
+}
+
+.cap-num {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.4rem;
+  color: var(--teal);
+  line-height: 1;
+  margin-top: -0.1rem;
+}
+
+.cap-title { font-weight: 500; margin-bottom: 0.25rem; color: var(--ink); font-size: 0.8rem; }
+.cap-desc { color: var(--mid); font-size: 0.72rem; }
+
+.hero-right-bottom {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+}
+
+.stat-block {
+  padding: 2rem 1.5rem;
+  border-right: 1px solid var(--line-strong);
+  position: relative;
+}
+
+.stat-block:last-child { border-right: none; }
+.stat-block::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: var(--teal);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.5s;
+}
+.stat-block:hover::after { transform: scaleX(1); }
+
+.stat-n {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 2.8rem;
+  letter-spacing: 0.02em;
+  color: var(--ink);
+  line-height: 1;
+  display: block;
+}
+
+.stat-l {
+  font-size: 0.62rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--mid);
+  margin-top: 0.4rem;
+  line-height: 1.5;
+}
+
+/* ━━━ SHARED SECTION ━━━ */
+.section-wrapper {
+  position: relative;
+  z-index: 1;
+}
+
+.section-label-bar {
+  background: var(--ink);
+  padding: 0.75rem 4rem;
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+}
+
+.section-label-bar span {
+  font-size: 0.6rem;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.3);
+}
+
+.section-label-bar .section-title-bar {
+  color: var(--teal);
+  font-weight: 500;
+}
+
+.section-label-bar::before {
+  content: '▶';
+  color: var(--teal);
+  font-size: 0.5rem;
+}
+
+/* ━━━ BENEFITS ━━━ */
+#benefits {
+  background: var(--white);
+  position: relative;
+  z-index: 1;
+}
+
+.benefits-header {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  border-bottom: 1px solid var(--line-strong);
+}
+
+.benefits-header-left {
+  padding: 5rem 4rem;
+  border-right: 1px solid var(--line-strong);
+}
+
+.eyebrow {
+  font-size: 0.62rem;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--teal);
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+.eyebrow::before { content: '//'; color: var(--mid); }
+
+.sec-heading {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(2.8rem, 4vw, 5rem);
+  letter-spacing: 0.03em;
+  line-height: 0.93;
+  color: var(--ink);
+}
+
+.sec-heading em {
+  font-family: 'Libre Baskerville', serif;
+  font-style: italic;
+  color: var(--teal);
+}
+
+.benefits-header-right {
+  padding: 5rem 4rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.benefits-header-right p {
+  font-size: 0.82rem;
+  line-height: 2;
+  color: var(--charcoal);
+  margin-bottom: 1.5rem;
+}
+
+.benefits-cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  border-bottom: 1px solid var(--line-strong);
+}
+
+.benefit-card {
+  padding: 3.5rem 3rem;
+  border-right: 1px solid var(--line-strong);
+  position: relative;
+  transition: background 0.3s;
+}
+
+.benefit-card:last-child { border-right: none; }
+.benefit-card:hover { background: var(--fog); }
+
+.benefit-card::before {
+  content: attr(data-num);
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 8rem;
+  color: rgba(14,14,14,0.04);
+  position: absolute;
+  top: 1rem;
+  right: 1.5rem;
+  line-height: 1;
+}
+
+.bc-icon {
+  width: 48px; height: 48px;
+  border: 1px solid var(--teal);
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 2rem;
+  position: relative;
+}
+
+.bc-icon::after {
+  content: '';
+  position: absolute;
+  inset: 3px;
+  background: var(--teal-dim);
+}
+
+.bc-icon svg { position: relative; z-index: 1; }
+
+.bc-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.4rem;
+  letter-spacing: 0.06em;
+  color: var(--ink);
+  margin-bottom: 1rem;
+  line-height: 1.1;
+}
+
+.bc-body {
+  font-size: 0.78rem;
+  line-height: 1.95;
+  color: var(--mid);
+  margin-bottom: 2rem;
+}
+
+.bc-body strong { color: var(--ink); font-weight: 400; }
+
+.bc-link {
+  font-size: 0.65rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--teal);
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: gap 0.2s;
+}
+
+.bc-link:hover { gap: 0.9rem; }
+
+/* ━━━ DETAIL SECTIONS ━━━ */
+.detail-block {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  border-top: 1px solid var(--line-strong);
+  position: relative;
+  z-index: 1;
+}
+
+.detail-block.flip { direction: rtl; }
+.detail-block.flip > * { direction: ltr; }
+
+.detail-block.bg-dark { background: var(--ink-soft); }
+.detail-block.bg-fog { background: var(--fog); }
+
+.detail-content {
+  padding: 5rem 4rem;
+  border-right: 1px solid var(--line-strong);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.detail-block.bg-dark .detail-content { border-color: rgba(255,255,255,0.06); }
+
+.detail-content p {
+  font-size: 0.8rem;
+  line-height: 2;
+  margin-top: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.detail-block.bg-dark .detail-content p { color: rgba(255,255,255,0.5); }
+.detail-block.bg-fog .detail-content p { color: var(--charcoal); }
+
+.detail-block.bg-dark .eyebrow { color: var(--teal); }
+.detail-block.bg-dark .sec-heading { color: var(--white); }
+
+.checklist {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.checklist li {
+  font-size: 0.76rem;
+  line-height: 1.7;
+  padding: 0.9rem 0;
+  border-bottom: 1px solid var(--line);
+  display: grid;
+  grid-template-columns: 1.5rem 1fr;
+  gap: 0.75rem;
+  align-items: baseline;
+}
+
+.detail-block.bg-dark .checklist li { border-color: rgba(255,255,255,0.06); color: rgba(255,255,255,0.55); }
+.detail-block.bg-fog .checklist li { color: var(--charcoal); }
+
+.chk-mark { color: var(--teal); font-size: 0.8rem; font-weight: bold; }
+
+.detail-panel {
+  padding: 4rem 3.5rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 2.5rem;
+}
+
+.panel-metric {
+  border-left: 3px solid var(--teal);
+  padding-left: 1.5rem;
+}
+
+.pm-label {
+  font-size: 0.6rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--mid);
+  margin-bottom: 0.75rem;
+}
+
+.detail-block.bg-dark .pm-label { color: rgba(255,255,255,0.3); }
+
+.pm-value {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 3.5rem;
+  letter-spacing: 0.03em;
+  color: var(--ink);
+  line-height: 1;
+}
+
+.detail-block.bg-dark .pm-value { color: var(--white); }
+
+.pm-value .pm-accent { color: var(--teal); }
+
+.pm-sub {
+  font-size: 0.72rem;
+  color: var(--mid);
+  margin-top: 0.4rem;
+  line-height: 1.6;
+}
+
+.detail-block.bg-dark .pm-sub { color: rgba(255,255,255,0.35); }
+
+.detail-tag-cloud {
+  border: 1px solid var(--line);
+  padding: 1.5rem;
+}
+
+.detail-block.bg-dark .detail-tag-cloud { border-color: rgba(255,255,255,0.08); }
+
+.dtc-label {
+  font-size: 0.58rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--mid);
+  margin-bottom: 1rem;
+}
+
+.tag-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.tag {
+  font-size: 0.62rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 0.3rem 0.7rem;
+  border: 1px solid var(--teal);
+  color: var(--teal);
+}
+
+/* ━━━ SOCIAL PROOF ━━━ */
+#social-proof {
+  background: var(--paper);
+  position: relative;
+  z-index: 1;
+}
+
+.proof-grid-outer {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  border-top: 1px solid var(--line-strong);
+}
+
+.proof-sidebar {
+  background: var(--ink);
+  padding: 4rem 2.5rem;
+  border-right: 3px solid var(--teal);
+}
+
+.proof-sidebar .eyebrow { color: var(--teal); }
+.proof-sidebar .sec-heading { color: var(--white); font-size: 2.2rem; }
+
+.proof-sidebar-body {
+  margin-top: 2rem;
+  font-size: 0.75rem;
+  line-height: 1.9;
+  color: rgba(255,255,255,0.4);
+}
+
+.proof-sidebar-stats {
+  margin-top: 3rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.pss-item {}
+.pss-num {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 2.5rem;
+  color: var(--teal);
+  line-height: 1;
+}
+
+.pss-desc {
+  font-size: 0.65rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.3);
+  margin-top: 0.3rem;
+}
+
+.proof-main {}
+
+.testimonials-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+
+.tcard {
+  padding: 3rem;
+  border-bottom: 1px solid var(--line-strong);
+  border-right: 1px solid var(--line-strong);
+  position: relative;
+  transition: background 0.3s;
+}
+
+.tcard:hover { background: var(--fog); }
+.tcard:nth-child(2n) { border-right: none; }
+
+.tcard-featured {
+  grid-column: 1 / 3;
+  border-right: none;
+  background: var(--ink);
+  padding: 4rem;
+}
+
+.tcard-featured:hover { background: var(--ink-soft); }
+
+.tq {
+  font-family: 'Libre Baskerville', serif;
+  font-style: italic;
+  font-size: 1rem;
+  line-height: 1.8;
+  color: var(--charcoal);
+  margin-bottom: 2rem;
+}
+
+.tcard-featured .tq {
+  font-size: 1.25rem;
+  color: var(--white);
+}
+
+.open-quote {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 5rem;
+  color: var(--teal);
+  line-height: 0.5;
+  display: block;
+  margin-bottom: 1.5rem;
+  opacity: 0.6;
+}
+
+.tauthor { }
+.ta-name {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1rem;
+  letter-spacing: 0.08em;
+  color: var(--ink);
+}
+
+.tcard-featured .ta-name { color: var(--white); }
+
+.ta-role {
+  font-size: 0.65rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--mid);
+  margin-top: 0.2rem;
+}
+
+.trust-logos-bar {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  border-top: 1px solid var(--line-strong);
+}
+
+.tlb-item {
+  padding: 2rem;
+  border-right: 1px solid var(--line-strong);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.tlb-item:last-child { border-right: none; }
+
+.tlb-num {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 2.5rem;
+  color: var(--ink);
+  display: block;
+  line-height: 1;
+}
+
+.tlb-label {
+  font-size: 0.6rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--mid);
+  margin-top: 0.4rem;
+  line-height: 1.4;
+}
+
+/* ━━━ FAQ ━━━ */
+#faq {
+  background: var(--white);
+  position: relative;
+  z-index: 1;
+  border-top: 1px solid var(--line-strong);
+}
+
+.faq-outer {
+  display: grid;
+  grid-template-columns: 360px 1fr;
+}
+
+.faq-col-left {
+  padding: 5rem 4rem;
+  border-right: 1px solid var(--line-strong);
+  position: sticky;
+  top: 56px;
+  height: calc(100vh - 56px);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-self: start;
+}
+
+.faq-col-left p {
+  font-size: 0.78rem;
+  line-height: 1.9;
+  color: var(--mid);
+  margin-top: 1.5rem;
+  margin-bottom: 2.5rem;
+}
+
+.faq-col-right { padding: 0; }
+
+.faq-item {
+  border-bottom: 1px solid var(--line-strong);
+}
+
+.faq-q {
+  width: 100%;
+  background: none;
+  border: none;
+  padding: 2rem 4rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2rem;
+  text-align: left;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.1rem;
+  letter-spacing: 0.06em;
+  color: var(--ink);
+  transition: background 0.2s, color 0.2s;
+}
+
+.faq-q:hover { background: var(--fog); }
+.faq-item.open .faq-q { background: var(--ink); color: var(--teal); }
+
+.faq-toggle {
+  width: 28px; height: 28px;
+  border: 1px solid currentColor;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  font-size: 1.1rem;
+  transition: transform 0.3s;
+}
+
+.faq-item.open .faq-toggle { transform: rotate(45deg); }
+
+.faq-a {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.45s cubic-bezier(0.4,0,0.2,1);
+}
+
+.faq-item.open .faq-a { max-height: 500px; }
+
+.faq-a-inner {
+  padding: 0 4rem 2.5rem;
+  font-size: 0.8rem;
+  line-height: 2;
+  color: var(--charcoal);
+}
+
+/* ━━━ CTA SECTION ━━━ */
+#cta {
+  background: var(--ink);
+  position: relative;
+  z-index: 1;
+  border-top: 3px solid var(--teal);
+  overflow: hidden;
+}
+
+#cta::before {
+  content: 'PGM BI';
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 22rem;
+  color: rgba(255,255,255,0.015);
+  position: absolute;
+  bottom: -3rem;
+  left: -2rem;
+  line-height: 1;
+  pointer-events: none;
+  letter-spacing: -0.02em;
+}
+
+.cta-inner {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  min-height: 70vh;
+}
+
+.cta-left {
+  padding: 6rem 4rem;
+  border-right: 1px solid rgba(255,255,255,0.06);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  position: relative;
+  z-index: 1;
+}
+
+.cta-left .eyebrow { color: var(--teal); }
+.cta-left .sec-heading { color: var(--white); }
+
+.cta-left .sec-heading em {
+  font-family: 'Libre Baskerville', serif;
+  font-style: italic;
+  color: var(--teal);
+}
+
+.cta-body {
+  font-size: 0.8rem;
+  line-height: 2;
+  color: rgba(255,255,255,0.4);
+  margin-top: 1.5rem;
+  max-width: 420px;
+}
+
+.cta-trust {
+  margin-top: 3rem;
+  padding: 1.5rem;
+  border: 1px solid rgba(255,255,255,0.06);
+  font-size: 0.68rem;
+  letter-spacing: 0.1em;
+  color: rgba(255,255,255,0.25);
+  line-height: 1.8;
+}
+
+.cta-trust strong { color: rgba(255,255,255,0.5); font-weight: 400; }
+
+.cta-right {
+  padding: 6rem 4rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 1.5rem;
+  position: relative;
+  z-index: 1;
+}
+
+.cta-divider {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  font-size: 0.6rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.2);
+  margin: 0.5rem 0;
+}
+
+.cta-divider::before,
+.cta-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: rgba(255,255,255,0.08);
+}
+
+/* CTA BUTTON VARIANTS */
+.cta-btn-1 {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.4rem 2rem;
+  background: var(--teal);
+  color: var(--ink);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.78rem;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  text-decoration: none;
+  border: none;
+  transition: all 0.25s;
+  position: relative;
+  overflow: hidden;
+}
+
+.cta-btn-1::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 4px;
+  background: var(--ink);
+  opacity: 0.2;
+}
+
+.cta-btn-1:hover { background: var(--teal-dark); transform: translateX(6px); }
+
+.cta-btn-2 {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.2rem 2rem;
+  background: transparent;
+  color: var(--white);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.75rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  text-decoration: none;
+  border: 1px solid rgba(0,196,160,0.4);
+  transition: all 0.25s;
+}
+
+.cta-btn-2:hover { border-color: var(--teal); background: rgba(0,196,160,0.06); }
+
+.cta-btn-3 {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.2rem 2rem;
+  background: transparent;
+  color: rgba(255,255,255,0.5);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.75rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  text-decoration: none;
+  border: 1px solid rgba(255,255,255,0.1);
+  transition: all 0.25s;
+}
+
+.cta-btn-3:hover { border-color: rgba(255,255,255,0.25); color: var(--white); }
+
+.cta-btn-4 {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.2rem 2rem;
+  background: rgba(255,255,255,0.04);
+  color: rgba(255,255,255,0.4);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.75rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  text-decoration: none;
+  border: 1px solid rgba(255,255,255,0.06);
+  transition: all 0.25s;
+}
+
+.cta-btn-4:hover { background: rgba(255,255,255,0.07); color: rgba(255,255,255,0.6); }
+
+.cta-btn-5 {
+  text-align: center;
+  font-size: 0.7rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.25);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  background: none;
+  border: none;
+  padding: 0.5rem;
+  transition: color 0.2s;
+}
+
+.cta-btn-5:hover { color: rgba(255,255,255,0.5); }
+
+.arrow-icon { font-size: 1rem; }
+
+/* ━━━ FOOTER ━━━ */
+footer {
+  background: var(--ink-soft);
+  border-top: 1px solid rgba(255,255,255,0.06);
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  position: relative;
+  z-index: 1;
+}
+
+.footer-col {
+  padding: 2.5rem 3rem;
+  border-right: 1px solid rgba(255,255,255,0.06);
+}
+
+.footer-col:last-child { border-right: none; }
+
+.footer-logo {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.5rem;
+  letter-spacing: 0.15em;
+  color: var(--white);
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+.footer-tagline {
+  font-size: 0.65rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.25);
+}
+
+.footer-label {
+  font-size: 0.58rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--teal);
+  margin-bottom: 1rem;
+}
+
+.footer-links { list-style: none; }
+.footer-links li { margin-bottom: 0.4rem; }
+.footer-links a {
+  font-size: 0.7rem;
+  color: rgba(255,255,255,0.3);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+.footer-links a:hover { color: rgba(255,255,255,0.6); }
+
+.footer-copy {
+  font-size: 0.62rem;
+  color: rgba(255,255,255,0.2);
+  line-height: 1.8;
+}
+
+/* ━━━ ANIMATIONS ━━━ */
+@keyframes slideInLeft {
+  from { opacity: 0; transform: translateX(-30px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes slideInRight {
+  from { opacity: 0; transform: translateX(30px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.hero-left > * { animation: slideInLeft 0.7s ease both; }
+.hero-left > *:nth-child(1) { animation-delay: 0.1s; }
+.hero-left > *:nth-child(2) { animation-delay: 0.2s; }
+.hero-left > *:nth-child(3) { animation-delay: 0.3s; }
+.hero-left > *:nth-child(4) { animation-delay: 0.4s; }
+.hero-left > *:nth-child(5) { animation-delay: 0.5s; }
+
+.hero-right > * { animation: slideInRight 0.7s ease both; }
+.hero-right > *:nth-child(1) { animation-delay: 0.25s; }
+.hero-right > *:nth-child(2) { animation-delay: 0.4s; }
+
+/* ━━━ RESPONSIVE ━━━ */
+@media (max-width: 960px) {
+  nav { padding: 0 1rem; }
+  .nav-links { display: none; }
+  .hero { grid-template-columns: 1fr; }
+  .hero-right { border-left: none; border-top: 3px solid var(--teal); }
+  .hero-right-top { padding: 3rem 2rem; }
+  .hero-left { padding: 4rem 2rem; }
+  .benefits-header { grid-template-columns: 1fr; }
+  .benefits-header-left { border-right: none; border-bottom: 1px solid var(--line-strong); padding: 3rem 2rem; }
+  .benefits-header-right { padding: 3rem 2rem; }
+  .benefits-cards { grid-template-columns: 1fr; }
+  .benefit-card { border-right: none; border-bottom: 1px solid var(--line-strong); }
+  .detail-block { grid-template-columns: 1fr; }
+  .detail-block.flip { direction: ltr; }
+  .detail-content { border-right: none; border-bottom: 1px solid; padding: 3rem 2rem; }
+  .detail-panel { padding: 3rem 2rem; }
+  .proof-grid-outer { grid-template-columns: 1fr; }
+  .proof-sidebar { border-right: none; border-bottom: 3px solid var(--teal); }
+  .testimonials-grid { grid-template-columns: 1fr; }
+  .tcard { border-right: none; grid-column: auto; }
+  .tcard-featured { grid-column: auto; }
+  .trust-logos-bar { grid-template-columns: repeat(2, 1fr); }
+  .faq-outer { grid-template-columns: 1fr; }
+  .faq-col-left { position: static; height: auto; padding: 3rem 2rem; border-right: none; border-bottom: 1px solid var(--line-strong); }
+  .faq-q { padding: 1.5rem 2rem; }
+  .faq-a-inner { padding: 0 2rem 2rem; }
+  .cta-inner { grid-template-columns: 1fr; }
+  .cta-left { border-right: none; border-bottom: 1px solid rgba(255,255,255,0.06); padding: 4rem 2rem; }
+  .cta-right { padding: 3rem 2rem; }
+  footer { grid-template-columns: 1fr; }
+  .footer-col { border-right: none; border-bottom: 1px solid rgba(255,255,255,0.06); }
+  .section-label-bar { padding: 0.75rem 2rem; }
+}
+</style>
+</head>
+<body>
+
+<!-- ━━━━━━━━━━━━━━━━━━ NAV ━━━━━━━━━━━━━━━━━━ -->
+<nav>
+  <div class="nav-logo-block">
+    <div class="nav-logo">PGM BI</div>
+    <div class="nav-logo-tag">IOR Partner</div>
+  </div>
+  <ul class="nav-links">
+    <li><a href="#benefits">Solutions</a></li>
+    <li><a href="#beneficiation">Beneficiation</a></li>
+    <li><a href="#ior">Importer of Record</a></li>
+    <li><a href="#social-proof">Clients</a></li>
+    <li><a href="#faq">FAQ</a></li>
+  </ul>
+  <div class="nav-cta-block">
+    <a href="#cta" class="nav-cta">Begin Engagement →</a>
+  </div>
+</nav>
+
+<!-- ━━━━━━━━━━━━━━━━━━ HERO ━━━━━━━━━━━━━━━━━━ -->
+<section class="hero">
+  <!-- LEFT -->
+  <div class="hero-left">
+    <div class="hero-index">// 01 — PGM BI · Regulatory Intelligence</div>
+
+    <h1 class="hero-headline">
+      YOUR MINERALS.<br>
+      YOUR MEDICINES.<br>
+      <span class="accent">CROSSED BORDERS.</span><br>
+      ZERO RISK.
+    </h1>
+
+    <p class="hero-headline-sub">Beneficiation strategy meets<br>regulatory import mastery.</p>
+
+    <p class="hero-body">
+      PGM BI operates at the intersection of <strong>mineral value-chain intelligence</strong> and <strong>regulatory import compliance</strong> — acting as your fully accountable Importer of Record (IOR) across 40+ jurisdictions. We hold the liability, navigate the bureaucracy, and deliver results while you focus on your business.
+    </p>
+
+    <div class="hero-actions">
+      <a href="#cta" class="btn-teal">
+        <span>Schedule IOR Assessment</span>
+        <span class="arrow-icon">→</span>
+      </a>
+      <a href="#benefits" class="btn-wire">
+        <span>Explore Our Model</span>
+        <span>↓</span>
+      </a>
+    </div>
+  </div>
+
+  <!-- RIGHT -->
+  <div class="hero-right">
+    <div class="hero-right-top">
+      <h3>Core Capabilities</h3>
+      <ul class="capability-list">
+        <li>
+          <span class="cap-num">A</span>
+          <div>
+            <div class="cap-title">Mineral Beneficiation Advisory</div>
+            <div class="cap-desc">Value-chain analysis, processing feasibility, and offtake structuring for ore producers</div>
+          </div>
+        </li>
+        <li>
+          <span class="cap-num">B</span>
+          <div>
+            <div class="cap-title">Importer of Record (IOR) Services</div>
+            <div class="cap-desc">Full regulatory accountability for cross-border shipments — customs, duties, compliance documentation</div>
+          </div>
+        </li>
+        <li>
+          <span class="cap-num">C</span>
+          <div>
+            <div class="cap-title">Pharmaceutical Import Facilitation</div>
+            <div class="cap-desc">WHO-prequalified generic medicines sourcing, registration, and compliant delivery</div>
+          </div>
+        </li>
+        <li>
+          <span class="cap-num">D</span>
+          <div>
+            <div class="cap-title">ESG & Trade Compliance</div>
+            <div class="cap-desc">Environmental permitting, NMRA submissions, and DFI financing documentation</div>
+          </div>
+        </li>
+      </ul>
+    </div>
+
+    <div class="hero-right-bottom">
+      <div class="stat-block">
+        <span class="stat-n">40+</span>
+        <div class="stat-l">Jurisdictions Active</div>
+      </div>
+      <div class="stat-block">
+        <span class="stat-n">97%</span>
+        <div class="stat-l">First-Pass Clearance Rate</div>
+      </div>
+      <div class="stat-block">
+        <span class="stat-n">$2B+</span>
+        <div class="stat-l">Commodity Value IOR'd</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ━━━━━━━━━━━━━━━━━━ BENEFITS ━━━━━━━━━━━━━━━━━━ -->
+<div class="section-wrapper">
+  <div class="section-label-bar">
+    <span class="section-title-bar">Section 02</span>
+    <span>Why PGM BI</span>
+    <span>Core Solutions</span>
+  </div>
+</div>
+
+<section id="benefits" class="section-wrapper" style="padding:0;">
+  <div class="benefits-header">
+    <div class="benefits-header-left">
+      <div class="eyebrow">Core Solutions</div>
+      <h2 class="sec-heading">Three problems.<br><em>One partner.</em><br>Total clarity.</h2>
+    </div>
+    <div class="benefits-header-right">
+      <p>
+        Regulatory friction costs businesses an estimated <strong>12–18% of cross-border trade value</strong> in delays, penalties, and failed shipments. Meanwhile, unprocessed mineral exports surrender 40–80% of recoverable margin to downstream processors. PGM BI eliminates both drains through integrated advisory and hands-on regulatory accountability.
+      </p>
+      <p>
+        We don't just advise — we become the responsible party on the paperwork, absorbing regulatory liability so your capital and attention stay where they belong.
+      </p>
+    </div>
+  </div>
+
+  <div class="benefits-cards">
+    <!-- BENEFIT 1 -->
+    <div class="benefit-card" data-num="01">
+      <div class="bc-icon">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+          <polygon points="10,2 18,16 2,16" stroke="#00c4a0" stroke-width="1.5" fill="none"/>
+          <line x1="10" y1="7" x2="10" y2="12" stroke="#00c4a0" stroke-width="1.5"/>
+          <circle cx="10" cy="14" r="0.8" fill="#00c4a0"/>
+        </svg>
+      </div>
+      <h3 class="bc-title">Beneficiation Intelligence</h3>
+      <p class="bc-body">
+        Raw ore is the least profitable form your mineral can take. Our beneficiation advisory maps your specific ore body, models processing pathways, and identifies <strong>which upgrade delivers the highest return for your capital</strong> — from gravity concentration to full refining. We then structure the offtake and financing to make it bankable.
+      </p>
+      <a href="#beneficiation" class="bc-link">Learn More <span>→</span></a>
+    </div>
+
+    <!-- BENEFIT 2 -->
+    <div class="benefit-card" data-num="02">
+      <div class="bc-icon">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+          <rect x="2" y="4" width="16" height="12" rx="1" stroke="#00c4a0" stroke-width="1.5" fill="none"/>
+          <line x1="2" y1="8" x2="18" y2="8" stroke="#00c4a0" stroke-width="1"/>
+          <line x1="7" y1="8" x2="7" y2="16" stroke="#00c4a0" stroke-width="1"/>
+        </svg>
+      </div>
+      <h3 class="bc-title">Importer of Record (IOR)</h3>
+      <p class="bc-body">
+        The IOR is the legally accountable party for every import — responsible for duties, taxes, regulatory filings, and compliance. When you lack a local entity or the expertise to navigate customs in a foreign market, PGM BI <strong>steps in as your IOR</strong>: we hold the liability, execute the clearance, and ensure your goods move without seizure or delay.
+      </p>
+      <a href="#ior" class="bc-link">Learn More <span>→</span></a>
+    </div>
+
+    <!-- BENEFIT 3 -->
+    <div class="benefit-card" data-num="03">
+      <div class="bc-icon">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+          <circle cx="10" cy="10" r="8" stroke="#00c4a0" stroke-width="1.5" fill="none"/>
+          <path d="M10 2 C10 2 14 6 14 10 C14 14 10 18 10 18 C10 18 6 14 6 10 C6 6 10 2 10 2Z" stroke="#00c4a0" stroke-width="1" fill="none"/>
+          <line x1="2" y1="10" x2="18" y2="10" stroke="#00c4a0" stroke-width="1"/>
+        </svg>
+      </div>
+      <h3 class="bc-title">Pharmaceutical Import & Registration</h3>
+      <p class="bc-body">
+        Sourcing quality-assured generic medicines from WHO-prequalified manufacturers is half the battle. Getting them <strong>legally cleared and registered</strong> in your country's national medicines authority is the other half — where most importers fail. PGM BI handles both: procurement, national registration, customs IOR, and cold-chain delivery.
+      </p>
+      <a href="#cta" class="bc-link">Get Started <span>→</span></a>
+    </div>
+  </div>
+</section>
+
+<!-- ━━━━━━━━━━━━━━━━━━ BENEFICIATION DETAIL ━━━━━━━━━━━━━━━━━━ -->
+<div class="section-wrapper">
+  <div class="section-label-bar">
+    <span class="section-title-bar">Section 03</span>
+    <span>Beneficiation Advisory</span>
+  </div>
+</div>
+
+<div id="beneficiation" class="detail-block bg-dark">
+  <div class="detail-content">
+    <div class="eyebrow">Beneficiation</div>
+    <h2 class="sec-heading">ADD VALUE<br>BEFORE THE<br><em>BORDER.</em></h2>
+    <p>Every tonne of unprocessed mineral you export is a permanent transfer of margin to processors overseas. PGM BI's feasibility-to-financing approach captures that margin in your jurisdiction — increasing export revenue, supporting local employment, and creating ESG-compliant assets attractive to development finance institutions.</p>
+    <ul class="checklist">
+      <li><span class="chk-mark">✓</span> Mineralogical and metallurgical ore body assessment</li>
+      <li><span class="chk-mark">✓</span> Processing flowsheet design: gravity, flotation, leaching, refining</li>
+      <li><span class="chk-mark">✓</span> Bankable feasibility studies and capital expenditure modelling</li>
+      <li><span class="chk-mark">✓</span> Offtake agreements structured against processed product</li>
+      <li><span class="chk-mark">✓</span> DFI and project finance documentation (IFC, AfDB, Proparco)</li>
+      <li><span class="chk-mark">✓</span> Environmental & social impact assessments (ESIA)</li>
+    </ul>
+  </div>
+  <div class="detail-panel" style="background: var(--ink);">
+    <div class="panel-metric">
+      <div class="pm-label">Value Uplift: Raw Ore → Beneficiated Product</div>
+      <div class="pm-value"><span class="pm-accent">+</span>82<span class="pm-accent">%</span></div>
+      <div class="pm-sub">Average revenue increase per tonne across chrome, copper, and gold projects</div>
+    </div>
+    <div class="panel-metric">
+      <div class="pm-label">Average 24-Month Processing ROI</div>
+      <div class="pm-value">3.4<span class="pm-accent">×</span></div>
+      <div class="pm-sub">Based on mid-tier operations with $2M–$15M processing investment</div>
+    </div>
+    <div class="panel-metric">
+      <div class="pm-label">DFI Finance Secured (% of qualifying projects)</div>
+      <div class="pm-value">91<span class="pm-accent">%</span></div>
+      <div class="pm-sub">Projects that met ESG threshold received non-dilutive development financing</div>
+    </div>
+    <div class="detail-tag-cloud">
+      <div class="dtc-label">Minerals Covered</div>
+      <div class="tag-row">
+        <span class="tag">Gold</span>
+        <span class="tag">Chrome</span>
+        <span class="tag">Copper</span>
+        <span class="tag">PGMs</span>
+        <span class="tag">Lithium</span>
+        <span class="tag">Manganese</span>
+        <span class="tag">Iron Ore</span>
+        <span class="tag">Rare Earths</span>
+        <span class="tag">Coal</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ━━━━━━━━━━━━━━━━━━ IOR DETAIL ━━━━━━━━━━━━━━━━━━ -->
+<div class="section-wrapper">
+  <div class="section-label-bar">
+    <span class="section-title-bar">Section 04</span>
+    <span>Importer of Record Services</span>
+  </div>
+</div>
+
+<div id="ior" class="detail-block bg-fog flip">
+  <div class="detail-content" style="border-color: var(--line-strong);">
+    <div class="eyebrow">Importer of Record</div>
+    <h2 class="sec-heading">WE HOLD THE<br>LIABILITY.<br><em>YOU MOVE.</em></h2>
+    <p>Importing into a country without a local legal entity or the specialist knowledge to satisfy its customs authority is a risk most operators underestimate — until shipments are seized, fines issued, or supply chains collapse. As your IOR, PGM BI becomes the named legal party responsible for every regulatory obligation on your import: duties, VAT, declarations, and ongoing compliance.</p>
+    <ul class="checklist">
+      <li><span class="chk-mark">✓</span> Full legal accountability as the registered Importer of Record</li>
+      <li><span class="chk-mark">✓</span> Customs clearance, HS code classification, and duty calculation</li>
+      <li><span class="chk-mark">✓</span> Pre-shipment inspections and certificate of conformity</li>
+      <li><span class="chk-mark">✓</span> Import licensing and government permit facilitation</li>
+      <li><span class="chk-mark">✓</span> VAT/GST registration and reclaim management</li>
+      <li><span class="chk-mark">✓</span> Post-entry audit support and trade dispute resolution</li>
+    </ul>
+  </div>
+  <div class="detail-panel" style="background: var(--fog);">
+    <div class="panel-metric">
+      <div class="pm-label">Successful Customs Clearances</div>
+      <div class="pm-value" style="color:var(--ink)">12<span class="pm-accent">K+</span></div>
+      <div class="pm-sub" style="color:var(--mid)">Shipments cleared across 40+ countries without seizure or penalty</div>
+    </div>
+    <div class="panel-metric">
+      <div class="pm-label">Average Clearance Time vs. Industry Standard</div>
+      <div class="pm-value" style="color:var(--ink)"><span class="pm-accent">−</span>40<span class="pm-accent">%</span></div>
+      <div class="pm-sub" style="color:var(--mid)">Faster clearance through pre-lodgement document review and authority relationships</div>
+    </div>
+    <div class="panel-metric">
+      <div class="pm-label">Client Penalty Rate (Fines, Seizures, Delays)</div>
+      <div class="pm-value" style="color:var(--ink)">0.3<span class="pm-accent">%</span></div>
+      <div class="pm-sub" style="color:var(--mid)">Of shipments experienced any compliance incident in the past 36 months</div>
+    </div>
+    <div class="detail-tag-cloud" style="border-color: var(--line-strong);">
+      <div class="dtc-label" style="color:var(--mid)">IOR Regions Active</div>
+      <div class="tag-row">
+        <span class="tag">Sub-Saharan Africa</span>
+        <span class="tag">East Africa</span>
+        <span class="tag">West Africa</span>
+        <span class="tag">Southeast Asia</span>
+        <span class="tag">South Asia</span>
+        <span class="tag">MENA</span>
+        <span class="tag">Latin America</span>
+        <span class="tag">CIS</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ━━━━━━━━━━━━━━━━━━ SOCIAL PROOF ━━━━━━━━━━━━━━━━━━ -->
+<div class="section-wrapper">
+  <div class="section-label-bar">
+    <span class="section-title-bar">Section 05</span>
+    <span>Client Evidence</span>
+  </div>
+</div>
+
+<section id="social-proof" style="padding:0;">
+  <div class="proof-grid-outer">
+    <!-- SIDEBAR -->
+    <div class="proof-sidebar">
+      <div class="eyebrow">// Proof</div>
+      <h2 class="sec-heading">Operators who cannot afford to fail.</h2>
+      <p class="proof-sidebar-body">Our clients operate in environments where regulatory failure means seized inventory, halted production, or criminal liability. The testimony below reflects the outcomes of getting these things right — every time.</p>
+      <div class="proof-sidebar-stats">
+        <div class="pss-item">
+          <div class="pss-num">500+</div>
+          <div class="pss-desc">Client organisations globally</div>
+        </div>
+        <div class="pss-item">
+          <div class="pss-num">40+</div>
+          <div class="pss-desc">Countries with active IOR status</div>
+        </div>
+        <div class="pss-item">
+          <div class="pss-num">97%</div>
+          <div class="pss-desc">First-submission approval, pharma registration</div>
+        </div>
+        <div class="pss-item">
+          <div class="pss-num">$2B+</div>
+          <div class="pss-desc">Commodity value under IOR management</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TESTIMONIALS -->
+    <div class="proof-main">
+      <div class="testimonials-grid">
+        <!-- Featured -->
+        <div class="tcard tcard-featured">
+          <span class="open-quote">"</span>
+          <p class="tq">We had three shipments seized at customs in 18 months before PGM BI took over as our IOR. Since then — two years, fourteen countries, zero incidents. The peace of mind alone is worth the entire engagement fee.</p>
+          <div class="tauthor">
+            <div class="ta-name">Chief Supply Chain Officer</div>
+            <div class="ta-role" style="color:rgba(255,255,255,0.3);">Industrial Equipment Manufacturer · Cross-Border Operations</div>
+          </div>
+        </div>
+
+        <!-- Card 2 -->
+        <div class="tcard">
+          <span class="open-quote" style="font-size:3rem; line-height:0.5; display:block; margin-bottom:1rem; opacity:0.4; color:var(--teal);">"</span>
+          <p class="tq">Our chrome ore was fetching $42/tonne. After PGM BI's beneficiation assessment and the gravity plant they helped us finance, we're exporting lumpy chrome at $280/tonne. The math speaks for itself.</p>
+          <div class="tauthor">
+            <div class="ta-name">Managing Director</div>
+            <div class="ta-role">Chrome Mining Operation · Southern Africa</div>
+          </div>
+        </div>
+
+        <!-- Card 3 -->
+        <div class="tcard">
+          <span class="open-quote" style="font-size:3rem; line-height:0.5; display:block; margin-bottom:1rem; opacity:0.4; color:var(--teal);">"</span>
+          <p class="tq">The NMRA submission they prepared for our ARV portfolio was the most complete dossier our regulatory team had ever reviewed. Approved in 11 weeks — a process that typically takes 18 months.</p>
+          <div class="tauthor">
+            <div class="ta-name">Director of Regulatory Affairs</div>
+            <div class="ta-role">National Medicines Authority · East Africa</div>
+          </div>
+        </div>
+
+        <!-- Card 4 -->
+        <div class="tcard">
+          <span class="open-quote" style="font-size:3rem; line-height:0.5; display:block; margin-bottom:1rem; opacity:0.4; color:var(--teal);">"</span>
+          <p class="tq">We expanded into four new markets in Southeast Asia without setting up a single local entity. PGM BI was our IOR in all four — handling customs, VAT, and import licensing. Flawlessly.</p>
+          <div class="tauthor">
+            <div class="ta-name">VP International Operations</div>
+            <div class="ta-role">Medical Device Distributor · Global Expansion</div>
+          </div>
+        </div>
+
+        <!-- Card 5 -->
+        <div class="tcard">
+          <span class="open-quote" style="font-size:3rem; line-height:0.5; display:block; margin-bottom:1rem; opacity:0.4; color:var(--teal);">"</span>
+          <p class="tq">Generic medicine procurement went from a 9-month ordeal of failed bids and rejected shipments to a reliable 60-day cycle. Our medicine cost per patient dropped 44%. That's the kind of impact that reaches the ward.</p>
+          <div class="tauthor">
+            <div class="ta-name">Head of Procurement</div>
+            <div class="ta-role">Public Hospital Network · West Africa</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="trust-logos-bar">
+        <div class="tlb-item">
+          <span class="tlb-num">12K+</span>
+          <div class="tlb-label">Customs clearances completed</div>
+        </div>
+        <div class="tlb-item">
+          <span class="tlb-num">0.3%</span>
+          <div class="tlb-label">Compliance incident rate (industry avg: 8%)</div>
+        </div>
+        <div class="tlb-item">
+          <span class="tlb-num">500+</span>
+          <div class="tlb-label">Generic SKUs registered across markets</div>
+        </div>
+        <div class="tlb-item">
+          <span class="tlb-num">−40%</span>
+          <div class="tlb-label">Average clearance time vs. self-managed</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ━━━━━━━━━━━━━━━━━━ FAQ ━━━━━━━━━━━━━━━━━━ -->
+<div class="section-wrapper">
+  <div class="section-label-bar">
+    <span class="section-title-bar">Section 06</span>
+    <span>Frequently Asked Questions</span>
+  </div>
+</div>
+
+<section id="faq" style="padding:0;">
+  <div class="faq-outer">
+    <div class="faq-col-left">
+      <div class="eyebrow">FAQ</div>
+      <h2 class="sec-heading" style="font-size:2.5rem;">Common questions from operators.</h2>
+      <p>These are the questions we hear most often from procurement directors, mining operators, and compliance teams evaluating PGM BI. We respond to all custom inquiries within one business day.</p>
+      <a href="#cta" class="btn-teal" style="max-width:100%;">
+        <span>Ask a Direct Question</span>
+        <span>→</span>
+      </a>
+    </div>
+
+    <div class="faq-col-right">
+
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)">
+          What exactly does "Importer of Record" mean, and why do I need one?
+          <div class="faq-toggle">+</div>
+        </button>
+        <div class="faq-a">
+          <div class="faq-a-inner">
+            The Importer of Record (IOR) is the entity legally responsible for a shipment's compliance with the destination country's import regulations. This includes correct HS code classification, duty and tax payment, import licensing, and ongoing record-keeping obligations. You need an IOR when you do not have a legal entity registered in the destination country, when local regulations prohibit a foreign company from importing directly, or when your internal team lacks the specialist knowledge to execute a compliant clearance. PGM BI acts as your IOR — we sign the forms, we hold the liability, and your goods clear without incident.
+          </div>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)">
+          What liability does PGM BI take on as IOR?
+          <div class="faq-toggle">+</div>
+        </button>
+        <div class="faq-a">
+          <div class="faq-a-inner">
+            As IOR, PGM BI assumes full legal accountability for import compliance in the destination jurisdiction. This includes liability for correct duty payment, accurate declaration of goods, compliance with import restrictions and licensing requirements, and record retention obligations. We carry dedicated trade compliance insurance for this purpose. Client engagements include a clear scope-of-goods agreement — we do not take on IOR responsibility for goods that are misdescribed, prohibited, or outside the agreed product category.
+          </div>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)">
+          Can you act as IOR for pharmaceuticals and regulated medical goods?
+          <div class="faq-toggle">+</div>
+        </button>
+        <div class="faq-a">
+          <div class="faq-a-inner">
+            Yes — and this is where PGM BI's dual specialisation becomes uniquely valuable. Pharmaceuticals require not just customs clearance but national medicines registration, pharmacovigilance documentation, cold-chain certification, and ongoing product licence maintenance. We manage the full import lifecycle: sourcing from WHO-prequalified manufacturers, preparing NMRA dossiers, acting as the licensed IOR at the port, and coordinating in-country distribution. Our 97% first-submission approval rate reflects the depth of regulatory preparation that goes into every pharma import.
+          </div>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)">
+          How is PGM BI's beneficiation advisory different from a standard mining consultant?
+          <div class="faq-toggle">+</div>
+        </button>
+        <div class="faq-a">
+          <div class="faq-a-inner">
+            Standard mining consultants deliver reports. PGM BI delivers outcomes — we stay engaged from initial ore body assessment through to the first shipment of upgraded product. Our model includes offtake structuring, technology partner identification, ESG documentation for DFI financing, and export licensing. We also co-invest through success-fee structures on certain engagements, aligning our incentives entirely with your value uplift. If you don't achieve a measurable improvement in export revenue, we don't get paid.
+          </div>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)">
+          What industries do you serve beyond mining and pharmaceuticals?
+          <div class="faq-toggle">+</div>
+        </button>
+        <div class="faq-a">
+          <div class="faq-a-inner">
+            Our IOR capability extends to any regulated goods category — including industrial machinery, electronics, medical devices, chemicals, and agricultural inputs. Our beneficiation advisory is specific to extractive industries. The two most integrated verticals — where beneficiation and IOR intersect most powerfully — are mining and pharmaceuticals, which is why we lead with these. If you operate in a different category, contact us directly and we will assess whether our existing IOR infrastructure in your target market serves your product.
+          </div>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)">
+          Do you work with government and public-sector buyers?
+          <div class="faq-toggle">+</div>
+        </button>
+        <div class="faq-a">
+          <div class="faq-a-inner">
+            Government and institutional buyers — including ministries of health, state mining companies, and public hospital networks — are a core client segment. We are experienced with international tender processes, Global Fund and IDA credit-funded procurement, and the documentation requirements of multilateral development banks. For public-sector pharmaceutical procurement specifically, we provide all documentation required for multi-donor audit compliance including the Global Fund, USAID, and GAVI.
+          </div>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)">
+          What is the minimum shipment volume for IOR services?
+          <div class="faq-toggle">+</div>
+        </button>
+        <div class="faq-a">
+          <div class="faq-a-inner">
+            We do not impose a strict minimum volume — the commercial viability of IOR engagement depends on shipment value and frequency rather than volume alone. For pharmaceutical imports, we typically work with clients importing a minimum of USD $50,000 in goods per shipment. For minerals, engagement is typically project-based from the outset. Clients with smaller or infrequent shipments may benefit from our group or consolidated import structures, which reduce per-unit cost. Contact us with your specific requirements and we will provide a clear cost-benefit assessment within 48 hours.
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ━━━━━━━━━━━━━━━━━━ CTA ━━━━━━━━━━━━━━━━━━ -->
+<div class="section-wrapper">
+  <div class="section-label-bar">
+    <span class="section-title-bar">Section 07</span>
+    <span>Begin Your Engagement</span>
+  </div>
+</div>
+
+<section id="cta" style="padding:0;">
+  <div class="cta-inner">
+    <div class="cta-left">
+      <div class="eyebrow">// The Decision</div>
+      <h2 class="sec-heading" style="font-size:clamp(2.5rem,4vw,4.5rem);">
+        Every shipment<br>you move without<br>an IOR is a<br><em>liability held<br>by you.</em>
+      </h2>
+      <p class="cta-body">
+        The question is not whether regulatory complexity will catch up with your operation — it is when. PGM BI transfers that exposure to an entity built to manage it, while unlocking the mineral and pharmaceutical value chains that compound returns over time.
+      </p>
+      <div class="cta-trust">
+        <strong>All engagements operate under strict confidentiality.</strong><br>
+        No unsolicited follow-up · No shared client data · Responses within one business day · No obligation assessments available for qualifying operators
+      </div>
+    </div>
+
+    <div class="cta-right">
+      <!-- CTA 1: Maximum urgency — primary action -->
+      <a href="mailto:consult@pgmbi.com?subject=IOR Assessment Request" class="cta-btn-1">
+        <span>Book My IOR Assessment — Free</span>
+        <span class="arrow-icon">→</span>
+      </a>
+
+      <div class="cta-divider">or choose your entry point</div>
+
+      <!-- CTA 2: Product-specific, medium commitment -->
+      <a href="mailto:beneficiation@pgmbi.com?subject=Beneficiation Feasibility Request" class="cta-btn-2">
+        <span>⬡ Request Beneficiation Feasibility Study</span>
+        <span>→</span>
+      </a>
+
+      <!-- CTA 3: Pharma-specific -->
+      <a href="mailto:pharma@pgmbi.com?subject=Pharmaceutical Import Inquiry" class="cta-btn-3">
+        <span>✦ Pharmaceutical Import Inquiry</span>
+        <span>→</span>
+      </a>
+
+      <div class="cta-divider">lower commitment options</div>
+
+      <!-- CTA 4: Info-gather for undecided visitors -->
+      <a href="mailto:info@pgmbi.com?subject=IOR Country Coverage Check" class="cta-btn-4">
+        <span>◈ Check IOR Coverage in My Country</span>
+        <span>→</span>
+      </a>
+
+      <!-- CTA 5: Absolute lowest friction -->
+      <button class="cta-btn-5" onclick="window.location.href='mailto:info@pgmbi.com'">
+        Not sure where to start? Just email us — we'll guide you.
+      </button>
+    </div>
+  </div>
+</section>
+
+<!-- ━━━━━━━━━━━━━━━━━━ FOOTER ━━━━━━━━━━━━━━━━━━ -->
+<footer>
+  <div class="footer-col">
+    <span class="footer-logo">PGM BI</span>
+    <div class="footer-tagline">Beneficiation · IOR · Pharmaceuticals</div>
+  </div>
+  <div class="footer-col">
+    <div class="footer-label">Navigation</div>
+    <ul class="footer-links">
+      <li><a href="#benefits">Core Solutions</a></li>
+      <li><a href="#beneficiation">Beneficiation Advisory</a></li>
+      <li><a href="#ior">Importer of Record</a></li>
+      <li><a href="#social-proof">Client Evidence</a></li>
+      <li><a href="#faq">FAQ</a></li>
+    </ul>
+  </div>
+  <div class="footer-col">
+    <div class="footer-copy">
+      © 2025 PGM BI. All rights reserved.<br><br>
+      Regulatory advisory and IOR services are provided subject to applicable trade law in each jurisdiction. Past performance data reflects aggregate client outcomes and does not guarantee identical results for new engagements.
+    </div>
+  </div>
+</footer>
+
+<script>
+function toggleFaq(btn) {
+  const item = btn.closest('.faq-item');
+  const isOpen = item.classList.contains('open');
+  document.querySelectorAll('.faq-item.open').forEach(i => i.classList.remove('open'));
+  if (!isOpen) item.classList.add('open');
+}
+
+// Scroll-activated metric reveal
+let metricsRevealed = false;
+const metricObserver = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting && !metricsRevealed) {
+      metricsRevealed = true;
+      document.querySelectorAll('.pm-value').forEach((el, i) => {
+        el.style.opacity = '0';
+        el.style.transform = 'translateY(20px)';
+        setTimeout(() => {
+          el.style.transition = 'all 0.6s ease';
+          el.style.opacity = '1';
+          el.style.transform = 'translateY(0)';
+        }, i * 150);
+      });
+    }
+  });
+}, { threshold: 0.3 });
+
+const firstMetric = document.querySelector('.panel-metric');
+if (firstMetric) metricObserver.observe(firstMetric);
+
+// Benefit card hover line accent
+document.querySelectorAll('.benefit-card').forEach(card => {
+  card.addEventListener('mouseenter', () => {
+    card.style.borderTop = '2px solid var(--teal)';
+  });
+  card.addEventListener('mouseleave', () => {
+    card.style.borderTop = '';
+  });
+});
+</script>
+</body>
+</html>
